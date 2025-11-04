@@ -1,10 +1,13 @@
- name: INAP Monitor
+name: INAP Monitor
+
 on:
   schedule:
-    - cron: "*/10 * * * *"   # cada 10 minutos
+    - cron: "*/10 * * * *"   # cada 10 minutos (UTC)
   workflow_dispatch: {}       # permite lanzarlo a mano
+
 permissions:
-  contents: write             # para hacer commit del state
+  contents: write             # para poder hacer push del state/log
+
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -26,14 +29,17 @@ jobs:
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: |
-          python monitor_inap.py
+          SNAPSHOT_SALT: ${{ secrets.SNAPSHOT_SALT }}   # opcional para forzar cambios
+        run: python monitor_inap.py
 
-      - name: Push state if changed
-        if: ${{ always() }}  # intentamos push aunque falle el monitor para persistir estado si existe
+      - name: Push state/log if changed
+        # Si el script ha hecho commit, aquí empujamos los cambios
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Si no hay commits (p.ej. primer run fallido), salimos sin error
+          git rev-parse --verify HEAD > /dev/null 2>&1 || exit 0
+          git push
 
       - name: Upload hashes.log
         if: always()
@@ -42,7 +48,3 @@ jobs:
           name: hashes-log
           path: hashes.log
           if-no-files-found: ignore
-
-          # Si hay commit pendiente, haz push
-          git rev-parse --verify HEAD > /dev/null 2>&1 || exit 0
-          git push

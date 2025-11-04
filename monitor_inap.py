@@ -5,7 +5,8 @@ import hashlib
 import requests
 from bs4 import BeautifulSoup
 
-URL = "https://sede.inap.gob.es/secretaria-intervencion-acceso-libre-2023-2024"
+#URL = "https://sede.inap.gob.es/secretaria-intervencion-acceso-libre-2023-2024"
+URL = "http://smarlexgames.es/prueba/index.html"
 STATE_FILE = "state_inap.json"
 LOG_FILE   = "hashes.log"
 
@@ -111,3 +112,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

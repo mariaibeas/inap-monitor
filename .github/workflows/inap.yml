@@ -2,7 +2,7 @@ name: INAP Monitor
 
 on:
   schedule:
-    - cron: "*/2 * * * *"   # cada 10 minutos (UTC)
+    - cron: "*/10 * * * *"   # cada 10 minutos (UTC)
   workflow_dispatch: {}       # permite lanzarlo a mano
 
 permissions:

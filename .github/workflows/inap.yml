@@ -1,0 +1,39 @@
+name: INAP Monitor
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # cada 10 minutos
+  workflow_dispatch: {}       # permite lanzarlo a mano
+permissions:
+  contents: write             # para hacer commit del state
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run monitor
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python monitor_inap.py
+
+      - name: Push state if changed
+        if: ${{ always() }}  # intentamos push aunque falle el monitor para persistir estado si existe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Si hay commit pendiente, haz push
+          git rev-parse --verify HEAD > /dev/null 2>&1 || exit 0
+          git push

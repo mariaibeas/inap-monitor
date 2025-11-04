@@ -1,0 +1,12 @@
+name: Ticker
+
+on:
+  schedule:
+    - cron: "* * * * *"    # cada 1 minuto (UTC)
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Tick $(date -u) UTC"

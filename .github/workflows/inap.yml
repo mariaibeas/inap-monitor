@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: "*/10 * * * *"   # cada 10 minutos (UTC)
   workflow_dispatch: {}       # permite lanzarlo a mano
+  repository_dispatch:     # ← ESTA ES LA LÍNEA MÁGICA
+    types: [external-cron]
 
 permissions:
   contents: write             # para poder hacer push del state/log

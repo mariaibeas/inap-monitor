@@ -7,9 +7,22 @@ from bs4 import BeautifulSoup
 
 URL = "https://sede.inap.gob.es/secretaria-intervencion-acceso-libre-2023-2024"
 STATE_FILE = "state_inap.json"
+LOG_FILE   = "hashes.log"
 
 TELEGRAM_TOKEN   = os.getenv("TELEGRAM_TOKEN","")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID","")
+
+# Para pruebas controladas: cambiar este secret hace que cambie el hash
+SNAPSHOT_SALT = os.getenv("SNAPSHOT_SALT","")
+
+def log(line: str):
+    line2 = f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | {line}"
+    print(line2)  # se verá en los logs de GitHub Actions
+    try:
+        with open(LOG_FILE, "a", encoding="utf-8") as f:
+            f.write(line2 + "\n")
+    except Exception:
+        pass
 
 def fetch_html(url: str) -> str:
     r = requests.get(url, timeout=25, headers={"User-Agent":"INAP-monitor/1.0"})
@@ -21,7 +34,7 @@ def extract_summary(html: str) -> str:
     main  = soup.find("article") or soup.find("main") or soup
     text  = re.sub(r"\n{2,}", "\n", main.get_text(separator="\n")).strip()
     lines = [L for L in text.split("\n") if L.strip()]
-    head  = "\n".join(lines[:200])  
+    head  = "\n".join(lines[:200])  # snapshot estable
     return head
 
 def load_state():
@@ -39,7 +52,7 @@ def sha256(s: str) -> str:
 
 def notify_telegram(message: str):
     if not (TELEGRAM_TOKEN and TELEGRAM_CHAT_ID):
-        print("[INFO] Telegram no configurado.")
+        log("[INFO] Telegram no configurado.")
         return
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": message}, timeout=15)
@@ -47,55 +60,54 @@ def notify_telegram(message: str):
 def commit_changes():
     subprocess.run(["git","config","user.name","inap-bot"], check=True)
     subprocess.run(["git","config","user.email","bot@users.noreply.github.com"], check=True)
-    subprocess.run(["git","add", STATE_FILE], check=True)
+    subprocess.run(["git","add", STATE_FILE, LOG_FILE], check=True)
     diff = subprocess.run(["git","diff","--cached","--quiet"])
     if diff.returncode != 0:
-        subprocess.run(["git","commit","-m","update state_inap.json"], check=True)
+        subprocess.run(["git","commit","-m","update state/log"], check=True)
         return True
     return False
 
 def main():
+    log(f"Inicio run | URL={URL}")
     html = fetch_html(URL)
     snap = extract_summary(html)
-    h    = sha256(snap)
-    state = load_state()
 
-    # --- PRIMERA EJECUCIÓN ---
+    # Hash incluyendo sal (si existe) para pruebas
+    h    = sha256(snap + SNAPSHOT_SALT)
+    state = load_state()
+    log(f"Hash actual={h} | salt={'(set)' if SNAPSHOT_SALT else '(empty)'}")
+
+    # PRIMERA VEZ: avisito de “bot activado”, sin “cambio”
     if state.get("hash") is None:
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         state["hash"] = h
         state["last_changed"] = ts
         save_state(state)
-        commit_changes()
-
-        # ✅ Mensaje de bienvenida
-        welcome = (
-            "✅ Bot activado correctamente.\n\n"
-            "A partir de ahora recibirás un mensaje cada vez que haya un cambio en la página:\n"
-            f"{URL}\n\n"
-            f"🕒 Inicio: {ts}"
+        log("Estado inicial guardado (no hay notificación de cambio).")
+        notify_telegram(
+            "✅ Bot activado.\n"
+            "A partir de ahora recibirás un mensaje cuando cambie la página:\n"
+            f"{URL}\n"
+            f"🕒 {ts}"
         )
-        notify_telegram(welcome)
-        print("[INIT] Estado inicial guardado. Mensaje de bienvenida enviado.")
+        commit_changes()
         return
 
-    # --- CAMBIOS SUBSIGUIENTES ---
+    # CAMBIO
     if h != state.get("hash"):
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        log("Cambio detectado -> notifico por Telegram.")
         state["hash"] = h
         state["last_changed"] = ts
         save_state(state)
-        commit_changes()
-
-        msg = (
+        notify_telegram(
             "🔔 INAP — Ha habido un cambio en la página de Secretaría-Intervención.\n"
             f"👉 {URL}\n"
             f"🕒 {ts}"
         )
-        notify_telegram(msg)
-        print("[CHANGE] Detectado y notificado.")
+        commit_changes()
     else:
-        print("[OK] Sin cambios.")
+        log("Sin cambios.")
 
 if __name__ == "__main__":
     main()

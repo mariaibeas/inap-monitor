@@ -50,3 +50,4 @@ jobs:
           name: hashes-log
           path: hashes.log
           if-no-files-found: ignore
+          #awake cron

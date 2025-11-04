@@ -16,3 +16,6 @@
 2025-11-04 12:45:58 | Inicio run | URL=http://smarlexgames.es/prueba/index.html
 2025-11-04 12:45:59 | Hash actual=3e9b0545a1381523ab330caa2f3bfb2ace59fe4611c027a96bace7e1003bc81a | salt=(empty)
 2025-11-04 12:45:59 | Cambio detectado -> notifico por Telegram.
+2025-11-04 13:50:03 | Inicio run | URL=http://smarlexgames.es/prueba/index.html
+2025-11-04 13:50:03 | Hash actual=91f38e3391c9ed538dd1bae0043bd5d1f90c864a3419fc1ae1d8fb9021911f55 | salt=(empty)
+2025-11-04 13:50:03 | Cambio detectado -> notifico por Telegram.

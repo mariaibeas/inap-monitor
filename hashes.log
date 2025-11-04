@@ -4,3 +4,6 @@
 2025-11-04 11:22:28 | Inicio run | URL=https://sede.inap.gob.es/secretaria-intervencion-acceso-libre-2023-2024
 2025-11-04 11:22:29 | Hash actual=ec463cfe4ca0f44f71c2e59d147cce2c7a0bcaaba7f222db24f473b82363809a | salt=(empty)
 2025-11-04 11:22:29 | Estado inicial guardado (no hay notificación de cambio).
+2025-11-04 11:35:31 | Inicio run | URL=http://smarlexgames.es/prueba/index.html
+2025-11-04 11:35:32 | Hash actual=3e9b0545a1381523ab330caa2f3bfb2ace59fe4611c027a96bace7e1003bc81a | salt=(empty)
+2025-11-04 11:35:32 | Cambio detectado -> notifico por Telegram.

@@ -17,12 +17,11 @@ def fetch_html(url: str) -> str:
     return r.text
 
 def extract_summary(html: str) -> str:
-    """Snapshot estable del contenido principal para detectar cambios."""
     soup  = BeautifulSoup(html, "html.parser")
     main  = soup.find("article") or soup.find("main") or soup
     text  = re.sub(r"\n{2,}", "\n", main.get_text(separator="\n")).strip()
     lines = [L for L in text.split("\n") if L.strip()]
-    head  = "\n".join(lines[:200])  # suficiente para detectar cambios
+    head  = "\n".join(lines[:200])  
     return head
 
 def load_state():
@@ -46,7 +45,6 @@ def notify_telegram(message: str):
     requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": message}, timeout=15)
 
 def commit_changes():
-    """Hace commit del state para persistir entre ejecuciones (lo empuja el workflow)."""
     subprocess.run(["git","config","user.name","inap-bot"], check=True)
     subprocess.run(["git","config","user.email","bot@users.noreply.github.com"], check=True)
     subprocess.run(["git","add", STATE_FILE], check=True)
@@ -62,25 +60,35 @@ def main():
     h    = sha256(snap)
     state = load_state()
 
-    # --- PRIMERA EJECUCIÓN: NO NOTIFICAR ---
+    # --- PRIMERA EJECUCIÓN ---
     if state.get("hash") is None:
+        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         state["hash"] = h
-        state["last_changed"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        state["last_changed"] = ts
         save_state(state)
         commit_changes()
-        print("[INIT] Estado inicial guardado. No se notifica.")
+
+        # ✅ Mensaje de bienvenida
+        welcome = (
+            "✅ Bot activado correctamente.\n\n"
+            "A partir de ahora recibirás un mensaje cada vez que haya un cambio en la página:\n"
+            f"{URL}\n\n"
+            f"🕒 Inicio: {ts}"
+        )
+        notify_telegram(welcome)
+        print("[INIT] Estado inicial guardado. Mensaje de bienvenida enviado.")
         return
 
-    # --- CAMBIO DETECTADO ---
+    # --- CAMBIOS SUBSIGUIENTES ---
     if h != state.get("hash"):
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         state["hash"] = h
         state["last_changed"] = ts
         save_state(state)
         commit_changes()
+
         msg = (
-            "🔔 INAP — Ha habido un cambio en la página de "
-            "Secretaría-Intervención (OEP 2023/24).\n"
+            "🔔 INAP — Ha habido un cambio en la página de Secretaría-Intervención.\n"
             f"👉 {URL}\n"
             f"🕒 {ts}"
         )

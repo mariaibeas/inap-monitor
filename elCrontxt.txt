@@ -1,0 +1,55 @@
+#name: INAP Monitor
+
+#on:
+ # schedule:
+  #  - cron: "*/10 * * * *"   # cada 10 minutos (UTC)
+  #workflow_dispatch: {}       # permite lanzarlo a mano
+  #repository_dispatch:     # ← ESTA ES LA LÍNEA MÁGICA
+   # types: [external-cron]
+
+#permissions:
+#  contents: write             # para poder hacer push del state/log
+
+#jobs:
+ # run:
+  #  runs-on: ubuntu-latest
+   # env:
+    #  TZ: Europe/Madrid
+    #steps:
+     # - name: Checkout
+      #  uses: actions/checkout@v4
+
+      #- name: Setup Python
+       # uses: actions/setup-python@v5
+        #with:
+         # python-version: "3.11"
+
+      #- name: Install deps
+       # run: |
+        #  python -m pip install --upgrade pip
+         # pip install -r requirements.txt
+
+      #- name: Run monitor
+       # env:
+        #  TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+         # TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          #SNAPSHOT_SALT: ${{ secrets.SNAPSHOT_SALT }}   # opcional para forzar cambios
+        #run: python monitor_inap.py
+
+      #- name: Push state/log if changed
+        # Si el script ha hecho commit, aquí empujamos los cambios
+       # env:
+        #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #run: |
+          # Si no hay commits (p.ej. primer run fallido), salimos sin error
+         # git rev-parse --verify HEAD > /dev/null 2>&1 || exit 0
+          #git push
+
+      #- name: Upload hashes.log
+       # if: always()
+        #uses: actions/upload-artifact@v4
+        #with:
+         # name: hashes-log
+         # path: hashes.log
+          #if-no-files-found: ignore
+          #awake cron

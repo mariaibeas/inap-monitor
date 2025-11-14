@@ -25,3 +25,6 @@
 2025-11-04 13:56:45 | Inicio run | URL=https://sede.inap.gob.es/secretaria-intervencion-acceso-libre-2023-2024
 2025-11-04 13:56:45 | Hash actual=ec463cfe4ca0f44f71c2e59d147cce2c7a0bcaaba7f222db24f473b82363809a | salt=(empty)
 2025-11-04 13:56:45 | Cambio detectado -> notifico por Telegram.
+2025-11-14 08:36:30 | Inicio run | URL=https://sede.inap.gob.es/secretaria-intervencion-acceso-libre-2023-2024
+2025-11-14 08:36:31 | Hash actual=294adf72dd691e645b725438e33ab026b051d5fab6d459217fdd95fc3552cd08 | salt=(empty)
+2025-11-14 08:36:31 | Cambio detectado -> notifico por Telegram.

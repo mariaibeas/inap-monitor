@@ -103,7 +103,7 @@ def main():
         state["last_changed"] = ts
         save_state(state)
         notify_telegram(
-            "🔔 INAP — Ha habido un cambio en la página de Secretaría-Intervención.\n"
+            "🔔 INAP — Ha habido un cambio en la página.\n"
             f"👉 {URL}\n"
             f"🕒 {ts}"
         )

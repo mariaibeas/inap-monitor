@@ -26,10 +26,31 @@ def log(line: str):
     except Exception:
         pass
 
-def fetch_html(url: str) -> str:
-    r = requests.get(url, timeout=25, headers={"User-Agent":"INAP-monitor/1.0"})
-    r.raise_for_status()
-    return r.text
+def fetch_html(url: str):
+    import time
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; INAP-monitor/1.0; +https://github.com/mariaibeas/inap-monitor)"
+    }
+
+    last_error = None
+
+    for intento in range(1, 4):
+        try:
+            log(f"Intento {intento}/3 descargando página...")
+            r = requests.get(url, timeout=45, headers=headers)
+            r.raise_for_status()
+            return r.text
+
+        except requests.exceptions.RequestException as e:
+            last_error = e
+            log(f"[WARN] Error descargando página en intento {intento}/3: {e}")
+
+            if intento < 3:
+                time.sleep(10)
+
+    log(f"[ERROR] No se pudo descargar la página tras 3 intentos: {last_error}")
+    return None
 
 def extract_summary(html: str) -> str:
     soup  = BeautifulSoup(html, "html.parser")
@@ -72,6 +93,12 @@ def commit_changes():
 def main():
     log(f"Inicio run | URL={URL}")
     html = fetch_html(URL)
+
+    if html is None:
+        log("[INFO] No se actualiza estado porque no se ha podido leer la web.")
+        commit_changes()
+        return
+
     snap = extract_summary(html)
 
     # Hash incluyendo sal (si existe) para pruebas

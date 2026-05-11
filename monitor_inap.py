@@ -5,7 +5,8 @@ import hashlib
 import requests
 from bs4 import BeautifulSoup
 
-URL = "https://sede.inap.gob.es/secretaria-intervencion-acceso-libre-2023-2024"
+URL = "https://sede.inap.gob.es/es/procedimientos-y-servicios/seleccion/escala-de-funcionarios-de-administracion-local-con-habilitacion-de-caracter-nacional/procesos-selectivos-vigentes/secretaria-categoria-de-entrada-acceso-libre-convocatoria-extraordinaria-oep-2023"
+#URL = "https://sede.inap.gob.es/secretaria-intervencion-acceso-libre-2023-2024"
 #URL = "http://smarlexgames.es/prueba/index.html"
 STATE_FILE = "state_inap.json"
 LOG_FILE   = "hashes.log"

@@ -124,17 +124,17 @@ def main():
 
     # CAMBIO
     if h != state.get("hash"):
-        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        log("Cambio detectado -> notifico por Telegram.")
-        state["hash"] = h
-        state["last_changed"] = ts
-        save_state(state)
-        notify_telegram(
-            "🔔 INAP — Ha habido un cambio en la página.\n"
-            f"👉 {URL}\n"
-            f"🕒 {ts}"
-        )
-        commit_changes()
+        #ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        #log("Cambio detectado -> notifico por Telegram.")
+        #state["hash"] = h
+        #state["last_changed"] = ts
+        #save_state(state)
+        #notify_telegram(
+         #   "🔔 INAP — Ha habido un cambio en la página.\n"
+          #  f"👉 {URL}\n"
+           # f"🕒 {ts}"
+        #)
+        #commit_changes()
     else:
         log("Sin cambios.")
 
